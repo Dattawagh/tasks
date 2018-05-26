@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="pagination.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<body>
+
+<div ng-app="myApp" ng-controller="myCtrl"> 
+<div class="container">
+	<br>
+		<a class="pull-right btn btn-sm btn-primary" href="add-user-country.html">Add new country</a>
+	
+<h1>All countries with pagination</h1>
+
+ 
+		<table class="table">
+			<thead>
+		        <tr>
+		          <th>Countries</th>
+				  <th>Threat Level</th>
+		        </tr> 
+			</thead> 
+			<tbody> 
+				<tr dir-paginate="country in
+		        countries|orderBy:sortKey:reverse|filter:search|itemsPerPage:10"> 
+				<td>{{ country.name}}</td> 
+				<td>{{ country.threatLevel }}</td> 
+			</tr>
+		 </tbody> 
+	 </table>
+	 <dir-pagination-controls
+	       max-size="10"
+	       direction-links="true"
+	       boundary-links="true" >
+	    </dir-pagination-controls>
+</div>
+
+</div>
+
+<script>
+var app = angular.module('myApp', ['angularUtils.directives.dirPagination']);
+app.controller('myCtrl', function($scope, $http) {
+  $http.get("https://web-travel-test.cc.uic.edu/countries")
+  .then(function(response) {
+      $scope.countries = response.data;
+	  
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="pagination.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<body>
+
+<div ng-app="myApp" ng-controller="myCtrl"> 
+
+<div class="container">
+<br>
+	<a class="btn btn-sm btn-primary" href="index.html">Back to all countries</a>
+<h1>All countries with pagination</h1>
+
+  <select ng-model="selectedCountry">
+		<option ng-repeat="country in countries" value="{{country.id}}">{{country.name}}</option>
+  </select>
+  
+<button ng-click="addCountry()">Add Country</button>
+
+<hr>
+	<h2>User Selected Countries</h2>
+		<table class="table">
+			<thead>
+		        <tr>
+		          <th>Country</th>
+				  <th>Threat Leavel</th>
+				   <th>Selected Date</th>
+		        </tr>
+			</thead>
+		  <tbody>
+		        <tr dir-paginate="country in userSelectedCountries|orderBy:sortKey:reverse|filter:search|itemsPerPage:10">
+	   		    <td>{{ country.name }}</td>
+	   		    <td>{{ country.threat_level }}</td>
+                <td>{{ country.created_at }}</td>
+		        </tr>
+		    </tbody>
+		</table>
+ <dir-pagination-controls
+       max-size="10"
+       direction-links="true"
+       boundary-links="true" >
+    </dir-pagination-controls>
+</div> 
+</div>
+<br>
+
+
+
+<script>
+var app = angular.module('myApp', ['angularUtils.directives.dirPagination']);
+app.controller('myCtrl', function($scope, $http, $filter) {
+	$scope.selectedCountry = "";
+	$scope.userSelectedCountries = [];
+    $http.get("https://web-travel-test.cc.uic.edu/countries")
+    .then(function(response) {
+    $scope.countries = response.data;
+	  
+  });
+  $scope.addCountry = function() {
+		  var countryObj = $filter('filter')($scope.countries, {'id': $scope.selectedCountry})[0];
+		  
+		  if(countryObj.threatLevel > 2){
+			  // Show user notification and restrict to add respective country
+			  alert(countryObj.threatText);
+		  } else {
+		  	// Collect & send data to PHP file to save in database.
+  		    $http({
+  		       method: "POST",
+  		       url: "saveData.php",
+  		       data: countryObj,
+   
+  		     }).then(function(response) {
+  				console.log(response);
+  				$scope.getSelectedData();
+				
+  		     },function(error){
+		 	
+  			 });
+		  }
+	
+		    
+    };
+	
+	$scope.getSelectedData = function(){
+	
+	    $http({
+	       method: "GET",
+	       url: "getData.php"
+	     }).then(function(response) {
+			$scope.userSelectedCountries = response.data;
+		
+	     },function(error){
+ 	
+		 });
+	
+	};
+		$scope.getSelectedData();
+});
+
+
+</script>
+
+</body>
+</html>
